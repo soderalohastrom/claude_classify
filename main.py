@@ -5,6 +5,9 @@ import logging
 import json
 
 from anthropic import Anthropic
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
 # Load environment variables from .env file
 load_dotenv()
@@ -249,9 +252,20 @@ def categorize_text(text, category):
             logging.error(f"Error during categorization: {e}")
             return "Error: Unable to categorize text."
 
+app = FastAPI()
+
+class ClassifyRequest(BaseModel):
+    text: str
+    category: str
+
+@app.post("/classify")
+async def classify(request: Request, classify_request: ClassifyRequest):
+    """Categorizes text using the Anthropic API."""
+    text = classify_request.text
+    category = classify_request.category
+    result = categorize_text(text, category)
+    return JSONResponse(content={"category": result})
+
 if __name__ == "__main__":
-    while True:
-        text = input("Enter the text you want to categorize: ")
-        category = input("Enter the category (or 'All' for all categories): ")
-        result = categorize_text(text, category)
-        print(json.dumps(result, indent=4))
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
