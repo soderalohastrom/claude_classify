@@ -231,7 +231,7 @@ def categorize_text(text, category):
         try:
             message = client.messages.create(
                 model="claude-3-5-sonnet-20241022",
-                max_tokens=4096,
+                max_tokens=32768,
                 temperature=0.4,
                 system=system_prompts[category],
                 messages=[
@@ -247,7 +247,13 @@ def categorize_text(text, category):
                 categorized_text = ' '.join(block.text for block in message.content if hasattr(block, 'text'))
             else:
                 categorized_text = message.content
+
+            # New check for response length
+            if len(categorized_text.strip()) > 50:
+                return ""  # Return empty string if response is too long
+                
             return categorized_text
+            
         except Exception as e:
             logging.error(f"Error during categorization: {e}")
             return "Error: Unable to categorize text."
