@@ -231,7 +231,7 @@ def categorize_text(text, category):
         try:
             message = client.messages.create(
                 model="claude-3-5-sonnet-20241022",
-                max_tokens=32768,
+                max_tokens=8192,
                 temperature=0.4,
                 system=system_prompts[category],
                 messages=[
